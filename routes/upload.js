@@ -98,16 +98,14 @@ router.post('/:assignmentId', authMiddleware, async (req, res) => {
 
         // Add the submission details to the assignment
         await Assignment.findOneAndUpdate(
-            { _id: assignmentId },
+            { _id: assignmentId, 'tasks.student_id': studentId },
             {
-                $addToSet: {
-                    'tasks': {
-                        student_id: studentId,
-                        submission_id: submissionId,
-                        student_name: studentName,
-                        file_name: submissionId + '_' + req.file.originalname.replace(/[^a-zA-Z0-9]/g, ''),
-                        student_email: studentEmail,
-                    }
+                $set: {
+                    'tasks.$.submission_id': submissionId,
+                    'tasks.$.student_name': studentName,
+                    'tasks.$.file_name': submissionId + '_' + req.file.originalname.replace(/[^a-zA-Z0-9]/g, ''),
+                    'tasks.$.submitted':true,
+                    'tasks.$.student_email': studentEmail,
                 }
             },
             { new: true }

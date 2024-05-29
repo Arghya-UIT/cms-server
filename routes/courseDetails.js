@@ -99,20 +99,23 @@ router.get('/courseItem/:courseId', authMiddleware, async (req, res) => {
 
         const assignmentIds = [];
         for (const course of student.courses) {
-            if (course.course_id === courseId) {
-                assignmentIds.push(...course.assignments);
+            if (await course.course_id === courseId) {
+                await assignmentIds.push(...course.assignments);
             }
         }
         console.log("assids ", assignmentIds);
         const assignmentDetails = [];
         for (const iterator of assignmentIds) {
+            console.log('entering');
             const assignment = await Assignment.findById(iterator);
+            console.log('found');
             if (!assignment) {
-                // return res.status(404).json({ message: 'Assignment not found' });
+                console,log('not found');
                 continue;
             }
             const studentTask = assignment.tasks.find(task => task.student_id === studentId);
             if (studentTask) {
+                console.log('found');
                 assignmentDetails.push({
                     assignmentId: assignment._id,
                     assignmentName: assignment.assignment_name,
@@ -123,6 +126,7 @@ router.get('/courseItem/:courseId', authMiddleware, async (req, res) => {
                     fileName: studentTask.file_name,
                     marks: studentTask.marks,
                     checked: studentTask.checked,
+                    submitted:studentTask.submitted,
                     studentName: studentTask.student_name,
                     studentEmail: studentTask.student_email,
                     taskId: studentTask._id
@@ -130,6 +134,7 @@ router.get('/courseItem/:courseId', authMiddleware, async (req, res) => {
                 });
             }
         }
+        console.log("succecc send ", assignmentDetails);
         return res.json({ assignments: assignmentDetails });
 
     } catch (error) {

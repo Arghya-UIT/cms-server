@@ -38,6 +38,10 @@ const AssignmentSchema = new mongoose.Schema({
             type: Boolean,
             default: false,
         },
+        submitted:{
+            type:Boolean,
+            default:false,
+        },
         student_name: {
             type: String,
             default: '',

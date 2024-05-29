@@ -79,25 +79,38 @@ router.post('/question', authMiddleware, async (req, res) => {
 
         // Upload the single file
         await uploadSingle(req, res);
+        let  course= await Course.findById(course_id);
+        const permanentStudent = course.permanent_student;
 
+        const tasks = permanentStudent.map(studentId => ({
+            student_id: studentId,
+            submission_id: '', 
+            file_name: '', 
+            marks: null, 
+            checked: false, 
+            submitted:false,
+            student_name: '', 
+            student_email: '' 
+          }));
+          
         // Create a new Assignment document
         const newAssignment = new Assignment({
             _id: assignmentId,
             course_id: course_id,
             assignment_name: req.file.originalname,
             assignment_file_name: assignmentId + '_' + req.file.originalname.replace(/[^a-zA-Z0-9]/g, ''),
+            tasks:tasks,
         });
 
         // Save the new Assignment document
         await newAssignment.save();
 
         // Update the Course document to add the assignment ID
-        let course = await Course.findOneAndUpdate(
+         course = await Course.findOneAndUpdate(
             { _id: course_id },
             { $addToSet: { 'assignments': assignmentId } },
             { new: true }
         );
-        const permanentStudent = course.permanent_student;
         console.log(permanentStudent);
 
         for (const studentId of permanentStudent) {
