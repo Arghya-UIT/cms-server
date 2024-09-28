@@ -3,10 +3,18 @@ const { body, validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../model/user'); // Adjust the path to your User model
+const rateLimit = require('express-rate-limit');
 
 const router = express.Router();
 
-router.post('/', [
+// Set up rate limiter: maximum of 100 requests per 15 minutes
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+});
+
+// Apply rate limiter to login route
+router.post('/', limiter, [
     body('email').isEmail().withMessage('Valid email is required'),
     body('password').notEmpty().withMessage('Password is required'),
 ], async (req, res) => {
